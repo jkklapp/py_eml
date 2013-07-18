@@ -1,17 +1,8 @@
-# Build a set of tuples (id, keyWordSet, abstract)
-
-from pymongo import MongoClient
-from bson.code import Code
-from bson.objectid import ObjectId
-import logging
-import re
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-
-db = MongoClient('localhost',27017).eml_docs
 from topia.termextract import tag
 tagger = tag.Tagger()
 tagger.initialize()
 
+# EML documents seem to have these weird chars...
 def cleanTerms(terms):
     if terms == []:
         return []
@@ -24,7 +15,7 @@ def cleanTerms(terms):
     return r
 
 """
-Summarizer
+Summarizer. The idea is to summarize the abstract and see if it maps to the keyword set
 """
 
 from collections import defaultdict
@@ -104,6 +95,7 @@ def isType(object, type):
     return object.__class__.__name__ == type
 
 
+# Functions to extract keywords from EML keywordSet, which are a mixture of dictionaries, lists, and nested data structures that are very difficult to reach.
 
 def parseListOfDictKeys(list):
     try:
@@ -111,7 +103,7 @@ def parseListOfDictKeys(list):
     except KeyError:
         return parseListOfUnicodeKeys([list['#text']])
 
-
+# This function gives you keywords from  keywordSets 'unicode lists' form.
 
 def parseListOfUnicodeKeys(list):
     r = []
@@ -134,6 +126,7 @@ def parseListOfUnicodeKeys(list):
             pass
     return r
 
+# Another form of keywordSet is the list of dictionaries
 
 def parseListOfDictsKeys(list):
     r = []
@@ -144,6 +137,7 @@ def parseListOfDictsKeys(list):
             r.append(dict[0]['#text'])
     return r
 
+# This function returns keys depending on the form of the keywordSet
 
 def getKeyFromDoc(doc):
     try:
@@ -160,29 +154,29 @@ def getKeyFromDoc(doc):
         pass
 
 
-tuples = {}
 
-#f = open('tuples', 'w')
-
-for doc in db.eml_docs.find():
-    try:
-        title = doc['dataset']['title'].encode("utf8")
-        abstract = doc["dataset"]["abstract"][0].encode("utf8")
-        abstract = re.sub("\n","",abstract)
-        title = re.sub("\n","",title)
-        keys = getKeyFromDoc(doc)
-        _id = str(doc['_id'])
-        if len(tokenize(abstract)) > 50:
-            abstract = summarize(abstract, 1)
-    except KeyError:
-        pass
-    except TypeError:
-        pass
-    except AttributeError:
-        pass
-    else:
-        if keys.__class__.__name__ != 'NoneType':
-            tuples[_id] = [title, abstract, keys]
+def getTuplesOfKeys():
+    tuples = {}
+    for doc in db.eml_docs.find():
+        try:
+            title = doc['dataset']['title'].encode("utf8")
+            abstract = doc["dataset"]["abstract"][0].encode("utf8")
+            abstract = re.sub("\n","",abstract)
+            title = re.sub("\n","",title)
+            keys = getKeyFromDoc(doc)
+            _id = str(doc['_id'])
+            if len(tokenize(abstract)) > 50:
+                abstract = summarize(abstract, 1)
+        except KeyError:
+            pass
+        except TypeError:
+            pass
+        except AttributeError:
+            pass
+        else:
+            if keys.__class__.__name__ != 'NoneType':
+                tuples[_id] = [title, abstract, keys]
+    return tuples
 
 
 from topia.termextract import extract

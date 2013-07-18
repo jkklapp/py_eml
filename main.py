@@ -2,51 +2,64 @@ from pymongo import MongoClient
 from bson.code import Code
 from bson.objectid import ObjectId
 import logging
+import matplotlib.pyplot as plt
+import numpy as np
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 db = MongoClient('localhost',27017)
 col = db.eml_docs.all
 
-# Count docs in collections
-total = 0
-for col in db.eml_docs.collection_names():
-   if col != 'system.indexes':
-      if col != 'all':
-         print db.eml_docs[col].count()
-         total+=db.eml_docs[col].count()
+execfile('code/eml/py_eml/eml_mr.py')
+
+#### Prepare data to plot
+tags = {}
+for c in db.eml_docs.collection_names():
+   if c != 'system.indexes':
+      #if c == 'all':
+      if c != "['dataset']":
+         tags[str(c)]=countRelativeOccurrenceTags(db.eml_docs[str(c)], "['dataset']['methods']") 
 
 
-# Count metadata elements - not interesting
-"""
-mapper = Code(    "function () {"
-               "  for(var i in this) {"
-               "    if(this.hasOwnProperty(i)){"
-               "      emit(i, 1);"
-               "    }"
-               "   }"
-               "}")
+try:
+   del tags["['dataset']"]
+except KeyError:
+   pass
 
-reducer = Code("function (key, values) {"
-            "       var total = 0;"
-            "      for (var i = 0; i < values.length; i++) {"
-            "        total += values[i];"
-            "      }"
-            "     return total;"
-            "   }")
-                
-result = db.eml_docs.map_reduce(mapper, reducer, "MROutput")
+db.eml_docs["['dataset']"].drop()
 
-for doc in result.find():
-    print doc
-"""
+for dict in tags:
+   if '@id' in tags[dict].keys():
+      del tags[dict]['@id']
+   if '@system' in tags[dict].keys():
+      del tags[dict]['@system']
+   if '0' in tags[dict].keys():
+      del tags[dict]['0']
+   for i in range(0,15):
+      if str(i) in tags[dict].keys():
+         del tags[dict][str(i)]
+
+# RUN TWICE!!!
+c = 0
+for dict in tags:
+   if c < len(tags[dict].keys()):
+      c = len(tags[dict].keys())
+      x = tags[dict].keys()
+
+for dict in tags:
+   for key in x:
+      if key not in tags[dict].keys():
+         tags[dict][key] = 0
+
+for dict in tags:
+   print len(tags[dict].keys())
+   print tags[dict].keys()
 
 
 
-# Get tags absolute occurrences in a numpy array
+# Plot collection count by LTER site
 
+import matplotlib.pyplot as plt
 import numpy as np
-
-data = getAbsoluteOccurrences(col, '["dataset"]')
 
 def rawDataFromDict(data):
    l = []
@@ -54,76 +67,65 @@ def rawDataFromDict(data):
       l.append(data[v])
    return l
 
-array = np.array(rawDataFromDict(data)).astype(int)
-
-import matplotlib.pyplot as plt
-
-plt.bar(range(0,array.size), array)
-
-plt.figure().addsubplot(2,1,1).set_xticklabels(data.keys(),rotation=90, rotation_mode="anchor", ha="right")
-plt.show()
-
-
-
-# Check if doc['dataset']['access'] is the same as doc['access']
-k = 0
-j = 0
-for doc in col.find():
-   try:
-      print "doc['access']: "+str(doc['access'])
-      k+=1
-   except KeyError:
-      pass
-   else:
-      try:
-         print "doc['dataset']['access']: "+str(doc['dataset']['access'])
-         j+=1
-      except KeyError:
-         pass
-
-print str(k)+", "+str(j)
-
-
-for doc in col.find():
-   try:
-      print doc['access']
-   except KeyError:
-      pass
-   else:
-      break
-
-
-
-printLongestText(col, '["dataset"]')
-
-# Plot collection count by LTER site
-
-import matplotlib.pyplot as plt
-
 data = {}
 
 for c in db.eml_docs.collection_names():
    if c != 'system.indexes':
-      col = db.eml_docs[str(c)]
-      data[str(c).replace("knb_lter_","")] = col.count()
+      if c != 'all':
+         col = db.eml_docs[str(c)]
+         data[str(c).replace("knb_lter_","")] = col.count()
 
+k = []
+v = []
+for key in sorted(data.keys()):
+   k.append(key)
+   v.append(data[key])
 
-
-
-
-import numpy as np
-
-array = np.array(rawDataFromDict(data)).astype(int)
-
+array = np.array(v)
 
 import matplotlib.pyplot as plt
 
 ax = plt.subplot(111)
-width=0.7
-bins = map(lambda x: x-width/2,range(0,len(data)))
+width=0.9
+bins = map(lambda x: x-width/2,range(0,len(k)))
 ax.bar(bins,array,width=width)
-ax.set_xticks(map(lambda x: x, range(0,len(data))))
-ax.set_xticklabels(data.keys(),rotation=0, ha="center")
+ax.set_xticks(map(lambda x: x, range(0,len(k))))
+ax.set_xticklabels(k, rotation=0, ha="center")
+plt.subplots_adjust(left = 0.22, right = 0.78, bottom = 0.75)
+plt.gca().set_xlim([0, 26])
+plt.savefig('all.png', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
 
-plt.show()
 
+
+i=1
+for dict in tags:
+   d = tags[dict]
+   k = []
+   v = []
+   for key in sorted(d):
+      k.append(key)
+      v.append(d[key])
+   hf, ha = plt.subplots(3,2)
+   ha[-1, -1].axis('off')   
+   array = np.array(v)
+   ax = plt.subplot(111)
+   i+=1
+   width=1
+   bins = map(lambda x: x-width/2, range(0, len(v)))
+   ax.bar(bins, array, width=width)
+   #if dict.replace("knb_lter_","") == 'vcr' || :
+   ax.set_xticks(map(lambda x: x-width/2, range(0, len(v))))
+   ax.set_xticklabels(k, rotation='vertical', ha="left")
+   #else:
+   #ax.set_xticklabels([])
+   #plt.suptitle(dict.replace("knb_lter_",""), fontsize=20)
+   ax.text(1.15, 0.5, dict.replace("knb_lter_",""),
+        horizontalalignment='center',
+        transform=ax.transAxes)
+   plt.subplots_adjust(left = 0.55, right = 0.78, bottom = 0.72)
+   plt.gca().set_xlim([0, len(v)])
+   plt.gca().set_ylim([0, 100])
+   #mytitle = plt.suptitle(dict.replace("knb_lter_",""))
+   plt.show()
+   #plt.savefig('Desktop/methods/'+dict+'methods.png', dpi=200, transparent=True, bbox_inches='tight', pad_inches=0)
+   break

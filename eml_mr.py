@@ -18,10 +18,36 @@ def countTags(collection, tag):
    if tag == '':
       tag = 'output'
    result = collection.map_reduce(mapper, reducer, tag)
+   r = {}
+   for doc in result.find():
+      r[doc['_id']] = doc['value']
+   return r   
+
+def countRelativeOccurrenceTags(collection, tag):
+   mapper = Code("function () {"
+         "           for(var i in this"+tag+") {"
+         "              if(this"+tag+".hasOwnProperty(i)){"
+         "                 emit(i, 1);"
+         "              }"
+         "           }"
+         "        }")
+   nDocs = collection.count()
+   reducer = Code("function (key, values) {"
+         "           var total = 0;"
+         "           for (var i = 0; i < values.length; i++) {"
+         "              total += values[i];"
+         "           }"
+         "           return total;"
+         "        }")
+   if tag == '':
+      tag = 'output'
+   result = collection.map_reduce(mapper, reducer, tag)
+   r = {}
+   nDocs = collection.count()
    for doc in result.find():
       n = float(doc['value'])/float(nDocs)*100
-      print (doc['_id']+" "+"{0:.1f}".format(n)+" %")
-
+      r[doc['_id']] = n
+   return r      
 
 def countTagValues(collection, tag):
    mapper = Code("function () {"
@@ -44,9 +70,11 @@ def countTagValues(collection, tag):
       tag = 'output'
    result = collection.map_reduce(mapper, reducer, tag)
    nDocs = collection.count()
+   r = {}
    for doc in result.find():
       n = float(doc['value'])/float(nDocs)*100
-      print (doc['_id']+" "+"{0:.1f}".format(n)+" %")
+      r[doc['_id']] = "{0:.1f}".format(n)+" %"
+   return r   
 
 # Search for 'tag' in 'module'
 
@@ -126,13 +154,6 @@ def printLongestText(collection, tag):
 def getTitleFromId(id):
    if id != "":
       return db.eml_docs.find({"_id": id})['dataset']['title']
-
-
-def rawDataFromDict(data):
-   l = []
-   for v in data.keys():
-      l.append(data[v])
-   return l
 
 
 def getAbsoluteOccurrences(collection, tag):
