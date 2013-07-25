@@ -1,3 +1,7 @@
+# Some primitives that use MR native framework from MongoDB to get some basci
+# stats from the data. It generates data to plot histograms
+
+
 # Get relative occurrence of tags inside 'tag' in 'collection'
 def countTags(collection, tag):
    mapper = Code("function () {"

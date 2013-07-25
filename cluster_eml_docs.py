@@ -1,3 +1,6 @@
+# Some code that uses MR to summarize text in the map phase, and then group
+# them in the reduce phase using topic similarity. Not working.
+
 from pymongo import MongoClient
 from bson.code import Code
 #require "sinatra"
@@ -8,7 +11,7 @@ from bson.code import Code
 import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-db = MongoClient('localhost',27017).eml_docs
+db = MongoClient('localhost',27777).eml_docs
 
 def cls(): print "\n" * 100
 

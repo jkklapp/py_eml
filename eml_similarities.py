@@ -1,3 +1,5 @@
+# Deprecated code.
+
 from pymongo import MongoClient
 import simplejson
 from gensim import corpora, models, similarities
@@ -5,7 +7,7 @@ import logging
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 # Open a connection
 client = MongoClient('localhost',27017)
-# Retrieve de DB
+# Retrieve the DB
 db = client.eml_docs
 # Get the collection
 eml_docs = db.eml_docs
