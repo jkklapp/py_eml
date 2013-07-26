@@ -1,7 +1,11 @@
-# The idea of this script is to see if the AGROVOC terms extracted from 
-# the abstract and other elements from EML documents, with the actual keywords
-# provided in the EML module eml['dataset']['keyWordset']
-
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+'''
+ The idea of this script is to see if the AGROVOC terms extracted from 
+ the abstract and other elements from EML documents, with the actual keywords
+ provided in the EML module eml['dataset']['keyWord']
+'''
 
 from topia.termextract import tag
 tagger = tag.Tagger()

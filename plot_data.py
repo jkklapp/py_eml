@@ -1,4 +1,7 @@
-#### Prepare data to plot
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+''' Prepare data to plot'''
 tags = {}
 for c in db.eml_docs.collection_names():
    if c != 'system.indexes':

@@ -1,14 +1,17 @@
-# Some scripts to mine data from 'dataTable' section in 'dataset'.
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+''' Some scripts to mine data from 'dataTable' section in 'dataset'.'''
 
 # Get datatables	
 dt = {}
 for doc in col.find():
 	try:
 		dt[doc['_id']] = doc['dataset']['dataTable']
-	except KeysError:
+	except KeyError:
 		pass
 
-# Analyze structure 
+# Analyze structure.
 x = 100000
 types = []
 for key in dt.keys():
@@ -74,7 +77,7 @@ documents = []
 for key in dt.keys():
 	documents.append(dt[key])
 
+dataFormat_keys = []
 for doc in documents:
 	if doc.__class__.__name__ == 'dict':
-		print doc['physical']
-
+		dataFormat_keys.append(doc['physical']['dataFormat'][0].keys())

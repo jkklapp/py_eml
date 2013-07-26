@@ -1,5 +1,8 @@
-# Some code to mine the 'eml-methods' module.
- 
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+''' Some code to mine the 'eml-methods' module. '''
+
 for doc in col.find():
 	try:
 		method = doc['dataset']['methods']

@@ -1,4 +1,7 @@
-# Deprecated code.
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+''' Deprecated code.
 
 from pymongo import MongoClient
 import simplejson

@@ -1,6 +1,10 @@
-# Some code that uses MR to summarize text in the map phase, and then group
-# them in the reduce phase using topic similarity. Not working.
-
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+'''
+ Some code that uses MR to summarize text in the map phase, and then group
+ them in the reduce phase using topic similarity. Not working.
+'''
 from pymongo import MongoClient
 from bson.code import Code
 #require "sinatra"

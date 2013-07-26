@@ -1,7 +1,11 @@
-# This code implements the case study conducted on the paper. It tries to measure
-# the time the experiment lasted vs the time that lasted until the publication 
-# of the associated paper.
-
+'''
+    Author: Jaakko Lappalainen, 2013. email: jkk.lapp@gmail.com
+'''
+'''
+ This code implements the case study conducted on the paper. It tries to measure
+ the time the experiment lasted vs the time that lasted until the publication 
+ of the associated paper.
+'''
 ###### Compare the number of days the exp. lasted vs publication date
 expTimes = []
 pubTimes = []
