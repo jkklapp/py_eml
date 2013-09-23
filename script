@@ -1,0 +1,2 @@
+#!/bin/sh
+for line in `cat urls`;do python get_emls.py $line $1 & done

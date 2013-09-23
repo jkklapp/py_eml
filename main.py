@@ -27,13 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
-db = MongoClient('localhost',27017)
-col = db.eml_docs.all
+host = MongoClient('localhost', 4000)
+db = host.eml_docs
 
-execfile('code/eml/py_eml/eml_mr.py')
-
-
-
-
-
-
+#execfile('code/eml/py_eml/eml_mr.py')

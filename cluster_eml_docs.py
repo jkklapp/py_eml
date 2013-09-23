@@ -19,7 +19,6 @@ db = MongoClient('localhost',27777).eml_docs
 
 def cls(): print "\n" * 100
 
-
 cls()
 
 def getText(raw):
@@ -99,7 +98,7 @@ count = Code ("function (key, values) {"
                 
            
             
-result = db.eml_docs.map_reduce(summarizer, count, "MROutput")
+result = db.eml_docs.all.map_reduce(summarizer, count, "MROutput")
 
 for doc in result.find():
     print doc
